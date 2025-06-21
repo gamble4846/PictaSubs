@@ -83,6 +83,31 @@ export class AppComponent implements AfterViewInit {
     this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
+  downloadCanvas() {
+    if (!this.canvasRef?.nativeElement || !this.ctx) return;
+    
+    const canvas = this.canvasRef.nativeElement;
+    
+    // Store original background color
+    const originalFillStyle = this.ctx.fillStyle;
+    
+    // Temporarily make background transparent
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Redraw everything except the background and wait for images to load
+    this.drawCanvasWithoutBackgroundWithImages().then(() => {
+      // Download the canvas with transparent background
+      const link = document.createElement('a');
+      link.download = `pictasubs-canvas-${new Date().getTime()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      // Restore the original background
+      this.ctx.fillStyle = originalFillStyle;
+      this.drawCanvas();
+    });
+  }
+
   private drawCanvas() {
     if (!this.ctx) return;
     
@@ -106,6 +131,23 @@ export class AppComponent implements AfterViewInit {
       this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
     } else {
       console.log('No text to draw or text is empty');
+    }
+  }
+
+  private drawCanvasWithoutBackground() {
+    if (!this.ctx) return;
+    
+    // Clear the canvas (this makes it transparent)
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Draw a border
+    this.ctx.strokeStyle = '#333';
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Add user text and images if provided
+    if (this.canvasText.trim()) {
+      this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
     }
   }
 
@@ -304,5 +346,232 @@ export class AppComponent implements AfterViewInit {
     };
     
     img.src = url;
+  }
+
+  private drawCanvasWithoutBackgroundWithImages(): Promise<void> {
+    if (!this.ctx) return Promise.resolve();
+    
+    // Clear the canvas (this makes it transparent)
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Draw a border
+    this.ctx.strokeStyle = '#333';
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Add user text and images if provided
+    if (this.canvasText.trim()) {
+      return this.drawTextWithImagesAsync(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
+    }
+    
+    return Promise.resolve();
+  }
+
+  private drawTextWithImagesAsync(text: string, x: number, y: number, maxWidth: number): Promise<void> {
+    return new Promise<void>((resolve) => {
+      // Split text by image URLs in format (image:URL,width:100px,height:100px)
+      const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
+      let match;
+      const parts: Array<{type: 'text' | 'image', content: string, width?: number, height?: number}> = [];
+      let lastIndex = 0;
+      
+      // Find all image matches and split text accordingly
+      while ((match = imageUrlRegex.exec(text)) !== null) {
+        // Add text before the image
+        const textBefore = text.substring(lastIndex, match.index);
+        if (textBefore.trim()) {
+          parts.push({type: 'text', content: textBefore.trim()});
+        }
+        
+        // Add the image
+        const url = match[1];
+        const width = match[2] ? parseInt(match[2]) : 120;
+        const height = match[3] ? parseInt(match[3]) : 80;
+        parts.push({type: 'image', content: url, width: width, height: height});
+        
+        lastIndex = match.index + match[0].length;
+      }
+      
+      // Add remaining text after the last image
+      const textAfter = text.substring(lastIndex);
+      if (textAfter.trim()) {
+        parts.push({type: 'text', content: textAfter.trim()});
+      }
+      
+      // If no parts were created (no images found), treat the entire text as a text part
+      if (parts.length === 0 && text.trim()) {
+        parts.push({type: 'text', content: text.trim()});
+      }
+      
+      let currentY = y;
+      const lineHeight = this.fontSize + 4;
+      const imageMargin = 10; // Margin around images
+      
+      // Set text properties
+      this.ctx!.fillStyle = this.fontColor;
+      
+      // Build font string based on formatting options
+      let fontStyle = '';
+      if (this.textItalic) {
+        fontStyle += 'italic ';
+      }
+      
+      let fontWeight = '';
+      if (this.textBold) {
+        fontWeight = 'bold ';
+      }
+      
+      this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px Arial`;
+      this.ctx!.textAlign = 'center';
+      this.ctx!.textBaseline = 'bottom';
+      
+      // Build lines of content
+      const lines: Array<{type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number}>[] = [];
+      let currentLine: Array<{type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number}> = [];
+      let currentLineWidth = 0;
+      
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        
+        if (part.type === 'image') {
+          // This is an image
+          const imageWidth = part.width || 120;
+          const imageHeight = part.height || 80;
+          const imageTotalWidth = imageWidth + imageMargin * 2;
+          
+          if (currentLineWidth + imageTotalWidth > maxWidth) {
+            // Start new line
+            if (currentLine.length > 0) {
+              lines.push([...currentLine]);
+              currentLine = [];
+              currentLineWidth = 0;
+            }
+          }
+          
+          currentLine.push({
+            type: 'image', 
+            content: part.content, 
+            width: imageTotalWidth,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
+          });
+          currentLineWidth += imageTotalWidth;
+          
+        } else if (part.type === 'text') {
+          // This is text
+          const words = part.content.split(' ');
+          
+          for (let j = 0; j < words.length; j++) {
+            const word = words[j];
+            const wordWidth = this.ctx!.measureText(word + ' ').width;
+            
+            if (currentLineWidth + wordWidth > maxWidth) {
+              // Start new line
+              if (currentLine.length > 0) {
+                lines.push([...currentLine]);
+                currentLine = [];
+                currentLineWidth = 0;
+              }
+            }
+            
+            currentLine.push({type: 'text', content: word + ' ', width: wordWidth});
+            currentLineWidth += wordWidth;
+          }
+        }
+      }
+      
+      // Add the last line
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+      }
+      
+      // Collect all image promises
+      const imagePromises: Promise<void>[] = [];
+      
+      // Draw all lines
+      for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
+        const line = lines[lineIndex];
+        const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
+        let currentX = x - lineWidth / 2; // Center the line
+        let maxItemHeight = lineHeight;
+        
+        for (let itemIndex = 0; itemIndex < line.length; itemIndex++) {
+          const item = line[itemIndex];
+          
+          if (item.type === 'image') {
+            const imageX = currentX + imageMargin;
+            const imgWidth = item.imageWidth || 120;
+            const imgHeight = item.imageHeight || 80;
+            const imgPromise = this.drawImageFromUrlAsync(item.content, imageX + imgWidth/2, currentY, imgWidth, imgHeight);
+            imagePromises.push(imgPromise);
+            maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
+          } else {
+            this.ctx!.fillText(item.content, currentX + item.width/2, currentY);
+            
+            // Apply underline if enabled
+            if (this.textUnderline) {
+              const textMetrics = this.ctx!.measureText(item.content);
+              const underlineY = currentY + 2; // Position underline below text
+              this.ctx!.strokeStyle = this.fontColor;
+              this.ctx!.lineWidth = 1;
+              this.ctx!.beginPath();
+              this.ctx!.moveTo(currentX + item.width/2 - textMetrics.width/2, underlineY);
+              this.ctx!.lineTo(currentX + item.width/2 + textMetrics.width/2, underlineY);
+              this.ctx!.stroke();
+            }
+          }
+          
+          currentX += item.width;
+        }
+        
+        currentY -= maxItemHeight;
+      }
+      
+      // Wait for all images to load
+      Promise.all(imagePromises).then(() => {
+        resolve();
+      });
+    });
+  }
+
+  private drawImageFromUrlAsync(url: string, x: number, y: number, maxWidth: number, maxHeight: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        // Calculate aspect ratio to maintain proportions
+        const aspectRatio = img.width / img.height;
+        let drawWidth = maxWidth;
+        let drawHeight = drawWidth / aspectRatio;
+        
+        if (drawHeight > maxHeight) {
+          drawHeight = maxHeight;
+          drawWidth = drawHeight * aspectRatio;
+        }
+        
+        // Center the image horizontally
+        const drawX = x - drawWidth / 2;
+        const drawY = y - drawHeight;
+        
+        this.ctx!.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        resolve();
+      };
+      
+      img.onerror = () => {
+        console.error('Failed to load image:', url);
+        // Draw a placeholder rectangle
+        this.ctx!.fillStyle = '#ccc';
+        this.ctx!.fillRect(x - maxWidth/2, y - maxHeight, maxWidth, maxHeight);
+        this.ctx!.fillStyle = '#666';
+        this.ctx!.font = '14px Arial';
+        this.ctx!.textAlign = 'center';
+        this.ctx!.textBaseline = 'middle';
+        this.ctx!.fillText('Image failed to load', x, y - maxHeight/2);
+        resolve(); // Resolve even on error to continue the process
+      };
+      
+      img.src = url;
+    });
   }
 }

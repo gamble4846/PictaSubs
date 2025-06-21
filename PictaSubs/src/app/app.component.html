@@ -85,6 +85,15 @@
             </button>
           </nz-form-control>
         </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control [nzSpan]="24">
+            <button nz-button nzType="primary" (click)="downloadCanvas()" nzBlock>
+              <span nz-icon nzType="download"></span>
+              Download as PNG
+            </button>
+          </nz-form-control>
+        </nz-form-item>
       </div>
     </nz-card>
   </div>
