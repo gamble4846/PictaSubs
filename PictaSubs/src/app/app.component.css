@@ -48,6 +48,7 @@ canvas {
 .text-style-options label {
   margin-bottom: 0;
   cursor: pointer;
+  margin-left: 0 !important;
 }
 
 .text-style-options label strong {
