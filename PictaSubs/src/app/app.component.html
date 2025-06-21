@@ -1,138 +1,182 @@
 <div class="main-container">
-  <div class="canvas-section">
-    <canvas #canvas id="mainCanvas" [width]="canvasWidth" [height]="canvasHeight"></canvas>
-  </div>
-
-  <div class="controls-section">
-    <nz-card nzTitle="Canvas Controls" [nzExtra]="extraTemplate">
-      <div class="controls">
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="widthInput">Width:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <nz-input-number id="widthInput" [(ngModel)]="canvasWidth" (ngModelChange)="updateCanvas()" [nzMin]="100"
-              [nzStep]="10" nzPlaceHolder="Enter width">
-            </nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="heightInput">Height:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <nz-input-number id="heightInput" [(ngModel)]="canvasHeight" (ngModelChange)="updateCanvas()" [nzMin]="100"
-              [nzStep]="10" nzPlaceHolder="Enter height">
-            </nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="textInput">Text:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <textarea nz-input id="textInput" [(ngModel)]="canvasText" (input)="updateCanvasText()"
-              nzPlaceHolder="Enter text to add to canvas" [nzAutosize]="{ minRows: 2, maxRows: 4 }">
-            </textarea>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="fontSizeInput">Font Size:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <nz-input-number id="fontSizeInput" [(ngModel)]="fontSize" (ngModelChange)="updateCanvasText()" [nzMin]="8"
-              [nzStep]="2" nzPlaceHolder="Font size">
-            </nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="fontColorInput">Font Color:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" nzShowText
-              nzSize="default">
-            </nz-color-picker>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="fontFamilyInput">Font Family:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <input nz-input id="fontFamilyInput" [(ngModel)]="fontFamily" (input)="updateCanvasText()"
-              nzPlaceHolder="Enter font family (e.g., Arial, Times New Roman, Helvetica)">
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="textStrokeColorInput">Text Stroke:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <div class="stroke-controls">
-              <nz-color-picker [(ngModel)]="textStrokeColor" (ngModelChange)="updateCanvasText()" nzShowText>
-              </nz-color-picker>
-              <nz-input-number [(ngModel)]="textStrokeSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
-                [nzStep]="1" nzPlaceHolder="Size">
-              </nz-input-number>
-            </div>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="imageBorderColorInput">Image Border:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <div class="border-controls">
-              <nz-color-picker [(ngModel)]="imageBorderColor" (ngModelChange)="updateCanvasText()" nzShowText>
-              </nz-color-picker>
-              <nz-input-number [(ngModel)]="imageBorderSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
-                [nzStep]="1" nzPlaceHolder="Size">
-              </nz-input-number>
-            </div>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6">Text Style:</nz-form-label>
-          <nz-form-control [nzSpan]="18">
-            <div class="text-style-options">
-              <label nz-checkbox [(ngModel)]="textBold" (ngModelChange)="updateCanvasText()">
-                <strong>Bold</strong>
-              </label>
-              <label nz-checkbox [(ngModel)]="textItalic" (ngModelChange)="updateCanvasText()">
-                <em>Italic</em>
-              </label>
-              <label nz-checkbox [(ngModel)]="textUnderline" (ngModelChange)="updateCanvasText()">
-                <u>Underline</u>
-              </label>
-            </div>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control [nzSpan]="24">
-            <button nz-button nzType="primary" (click)="resetCanvas()" nzBlock>
-              <span nz-icon nzType="reload"></span>
-              Reset to Default
-            </button>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control [nzSpan]="24">
-            <button nz-button nzType="default" (click)="clearCanvas()" nzBlock>
-              <span nz-icon nzType="delete"></span>
-              Clear Canvas
-            </button>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control [nzSpan]="24">
-            <button nz-button nzType="primary" (click)="downloadCanvas()" nzBlock>
-              <span nz-icon nzType="download"></span>
-              Download as PNG
-            </button>
-          </nz-form-control>
-        </nz-form-item>
+  <div class="timeline-section">
+    <nz-card nzTitle="Timeline" [nzExtra]="timelineExtraTemplate">
+      <div class="timeline-controls">
+        <div class="timeline-info">
+          <span>{{ getCurrentStateInfo() }}</span>
+        </div>
+        <div class="timeline-buttons">
+          <button nz-button nzType="default" (click)="goToPrevious()" [disabled]="!canGoPrevious()">
+            <span nz-icon nzType="left"></span>
+            Previous
+          </button>
+          <button nz-button nzType="default" (click)="goToNext()" [disabled]="!canGoNext()">
+            Next
+            <span nz-icon nzType="right"></span>
+          </button>
+        </div>
       </div>
     </nz-card>
+  </div>
+
+  <div class="canvas-and-controls">
+    <div class="canvas-section">
+      <canvas #canvas id="mainCanvas" [width]="canvasWidth" [height]="canvasHeight"></canvas>
+    </div>
+
+    <div class="controls-section">
+      <nz-card nzTitle="Canvas Controls" [nzExtra]="extraTemplate">
+        <div class="controls">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="widthInput">Width:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-input-number id="widthInput" [(ngModel)]="canvasWidth" (ngModelChange)="updateCanvas()" [nzMin]="100"
+                [nzStep]="10" nzPlaceHolder="Enter width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="heightInput">Height:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-input-number id="heightInput" [(ngModel)]="canvasHeight" (ngModelChange)="updateCanvas()" [nzMin]="100"
+                [nzStep]="10" nzPlaceHolder="Enter height">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="textInput">Text:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <textarea nz-input id="textInput" [(ngModel)]="canvasText" (input)="updateCanvasText()"
+                nzPlaceHolder="Enter text to add to canvas" [nzAutosize]="{ minRows: 2, maxRows: 4 }">
+              </textarea>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="fontSizeInput">Font Size:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-input-number id="fontSizeInput" [(ngModel)]="fontSize" (ngModelChange)="updateCanvasText()" [nzMin]="8"
+                [nzStep]="2" nzPlaceHolder="Font size">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="fontColorInput">Font Color:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" nzShowText
+                nzSize="default">
+              </nz-color-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="fontFamilyInput">Font Family:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <input nz-input id="fontFamilyInput" [(ngModel)]="fontFamily" (input)="updateCanvasText()"
+                nzPlaceHolder="Enter font family (e.g., Arial, Times New Roman, Helvetica)">
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="textStrokeColorInput">Text Stroke:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <div class="stroke-controls">
+                <nz-color-picker [(ngModel)]="textStrokeColor" (ngModelChange)="updateCanvasText()" nzShowText>
+                </nz-color-picker>
+                <nz-input-number [(ngModel)]="textStrokeSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
+                  [nzStep]="1" nzPlaceHolder="Size">
+                </nz-input-number>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="imageBorderColorInput">Image Border:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <div class="border-controls">
+                <nz-color-picker [(ngModel)]="imageBorderColor" (ngModelChange)="updateCanvasText()" nzShowText>
+                </nz-color-picker>
+                <nz-input-number [(ngModel)]="imageBorderSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
+                  [nzStep]="1" nzPlaceHolder="Size">
+                </nz-input-number>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6">Text Style:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <div class="text-style-options">
+                <label nz-checkbox [(ngModel)]="textBold" (ngModelChange)="updateCanvasText()">
+                  <strong>Bold</strong>
+                </label>
+                <label nz-checkbox [(ngModel)]="textItalic" (ngModelChange)="updateCanvasText()">
+                  <em>Italic</em>
+                </label>
+                <label nz-checkbox [(ngModel)]="textUnderline" (ngModelChange)="updateCanvasText()">
+                  <u>Underline</u>
+                </label>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button nzType="default" (click)="saveCurrentState()" nzBlock>
+                <span nz-icon nzType="save"></span>
+                Save Current State
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button nzType="primary" (click)="addNewState()" nzBlock>
+                <span nz-icon nzType="plus"></span>
+                Add New State
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button nzType="primary" (click)="resetCanvas()" nzBlock>
+                <span nz-icon nzType="reload"></span>
+                Reset to Default
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button nzType="default" (click)="clearCanvas()" nzBlock>
+                <span nz-icon nzType="delete"></span>
+                Clear Canvas
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-control [nzSpan]="24">
+              <button nz-button nzType="primary" (click)="downloadCanvas()" nzBlock>
+                <span nz-icon nzType="download"></span>
+                Download as PNG
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </nz-card>
+    </div>
   </div>
 </div>
 
 <ng-template #extraTemplate>
   <span nz-icon nzType="setting"></span>
+</ng-template>
+
+<ng-template #timelineExtraTemplate>
+  <span nz-icon nzType="history"></span>
 </ng-template>

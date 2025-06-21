@@ -49,14 +49,105 @@ export class AppComponent implements AfterViewInit {
   private defaultWidth: number = 400;
   private defaultHeight: number = 300;
 
+  // Timeline functionality
+  canvasStates: Array<{
+    canvasWidth: number;
+    canvasHeight: number;
+    canvasText: string;
+    fontSize: number;
+    fontColor: string;
+    fontFamily: string;
+    textStrokeColor: string;
+    textStrokeSize: number;
+    imageBorderColor: string;
+    imageBorderSize: number;
+    textBold: boolean;
+    textItalic: boolean;
+    textUnderline: boolean;
+    timestamp: Date;
+  }> = [];
+  currentStateIndex: number = -1;
+
   ngAfterViewInit() {
     this.initializeCanvas();
+    this.initializeDefaultState();
   }
 
   initializeCanvas() {
     const canvas = this.canvasRef.nativeElement;
     this.ctx = canvas.getContext('2d')!;
     this.drawCanvas();
+  }
+
+  initializeDefaultState() {
+    const defaultState = {
+      canvasWidth: this.canvasWidth,
+      canvasHeight: this.canvasHeight,
+      canvasText: this.canvasText,
+      fontSize: this.fontSize,
+      fontColor: this.fontColor,
+      fontFamily: this.fontFamily,
+      textStrokeColor: this.textStrokeColor,
+      textStrokeSize: this.textStrokeSize,
+      imageBorderColor: this.imageBorderColor,
+      imageBorderSize: this.imageBorderSize,
+      textBold: this.textBold,
+      textItalic: this.textItalic,
+      textUnderline: this.textUnderline,
+      timestamp: new Date()
+    };
+    
+    this.canvasStates = [defaultState];
+    this.currentStateIndex = 0;
+  }
+
+  saveCurrentState() {
+    const currentState = {
+      canvasWidth: this.canvasWidth,
+      canvasHeight: this.canvasHeight,
+      canvasText: this.canvasText,
+      fontSize: this.fontSize,
+      fontColor: this.fontColor,
+      fontFamily: this.fontFamily,
+      textStrokeColor: this.textStrokeColor,
+      textStrokeSize: this.textStrokeSize,
+      imageBorderColor: this.imageBorderColor,
+      imageBorderSize: this.imageBorderSize,
+      textBold: this.textBold,
+      textItalic: this.textItalic,
+      textUnderline: this.textUnderline,
+      timestamp: new Date()
+    };
+
+    // Update the current state
+    this.canvasStates[this.currentStateIndex] = currentState;
+  }
+
+  addNewState() {
+    const newState = {
+      canvasWidth: this.canvasWidth,
+      canvasHeight: this.canvasHeight,
+      canvasText: this.canvasText,
+      fontSize: this.fontSize,
+      fontColor: this.fontColor,
+      fontFamily: this.fontFamily,
+      textStrokeColor: this.textStrokeColor,
+      textStrokeSize: this.textStrokeSize,
+      imageBorderColor: this.imageBorderColor,
+      imageBorderSize: this.imageBorderSize,
+      textBold: this.textBold,
+      textItalic: this.textItalic,
+      textUnderline: this.textUnderline,
+      timestamp: new Date()
+    };
+
+    // Remove any states after current index (if we're not at the end)
+    if (this.currentStateIndex < this.canvasStates.length - 1) {
+      this.canvasStates = this.canvasStates.slice(0, this.currentStateIndex + 1);
+    }
+
+    this.canvasStates.push(newState);
+    this.currentStateIndex = this.canvasStates.length - 1;
   }
 
   updateCanvas() {
@@ -617,5 +708,67 @@ export class AppComponent implements AfterViewInit {
       
       img.src = url;
     });
+  }
+
+  getCurrentStateInfo(): string {
+    if (this.canvasStates.length === 0) return 'No states saved';
+    const state = this.canvasStates[this.currentStateIndex];
+    return `State ${this.currentStateIndex + 1} of ${this.canvasStates.length} - ${state.timestamp.toLocaleTimeString()}`;
+  }
+
+  loadCanvasState(state: any) {
+    this.canvasWidth = state.canvasWidth;
+    this.canvasHeight = state.canvasHeight;
+    this.canvasText = state.canvasText;
+    this.fontSize = state.fontSize;
+    this.fontColor = state.fontColor;
+    this.fontFamily = state.fontFamily;
+    this.textStrokeColor = state.textStrokeColor;
+    this.textStrokeSize = state.textStrokeSize;
+    this.imageBorderColor = state.imageBorderColor;
+    this.imageBorderSize = state.imageBorderSize;
+    this.textBold = state.textBold;
+    this.textItalic = state.textItalic;
+    this.textUnderline = state.textUnderline;
+    
+    this.updateCanvas();
+  }
+
+  goToPrevious() {
+    if (this.currentStateIndex > 0) {
+      this.currentStateIndex--;
+      this.loadCanvasState(this.canvasStates[this.currentStateIndex]);
+    }
+  }
+
+  goToNext() {
+    if (this.currentStateIndex < this.canvasStates.length - 1) {
+      this.currentStateIndex++;
+      this.loadCanvasState(this.canvasStates[this.currentStateIndex]);
+    }
+  }
+
+  canGoPrevious(): boolean {
+    return this.currentStateIndex > 0;
+  }
+
+  canGoNext(): boolean {
+    return this.currentStateIndex < this.canvasStates.length - 1;
+  }
+
+  private statesAreEqual(state1: any, state2: any): boolean {
+    return state1.canvasWidth === state2.canvasWidth &&
+           state1.canvasHeight === state2.canvasHeight &&
+           state1.canvasText === state2.canvasText &&
+           state1.fontSize === state2.fontSize &&
+           state1.fontColor === state2.fontColor &&
+           state1.fontFamily === state2.fontFamily &&
+           state1.textStrokeColor === state2.textStrokeColor &&
+           state1.textStrokeSize === state2.textStrokeSize &&
+           state1.imageBorderColor === state2.imageBorderColor &&
+           state1.imageBorderSize === state2.imageBorderSize &&
+           state1.textBold === state2.textBold &&
+           state1.textItalic === state2.textItalic &&
+           state1.textUnderline === state2.textUnderline;
   }
 }

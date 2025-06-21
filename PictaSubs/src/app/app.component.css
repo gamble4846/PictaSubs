@@ -1,9 +1,38 @@
 .main-container {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 20px;
-  align-items: flex-start;
   min-height: 100vh;
+}
+
+.timeline-section {
+  width: 100%;
+}
+
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.timeline-info {
+  flex: 1;
+  font-weight: 500;
+  color: #666;
+}
+
+.timeline-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.canvas-and-controls {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex: 1;
 }
 
 .canvas-section {
@@ -106,6 +135,11 @@ canvas {
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {
   .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .canvas-and-controls {
     flex-direction: column;
     align-items: center;
   }
