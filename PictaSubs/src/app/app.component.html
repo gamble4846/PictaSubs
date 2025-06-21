@@ -1,0 +1,90 @@
+<div class="main-container">
+  <div class="canvas-section">
+    <canvas #canvas id="mainCanvas" [width]="canvasWidth" [height]="canvasHeight"></canvas>
+  </div>
+
+  <div class="controls-section">
+    <nz-card nzTitle="Canvas Controls" [nzExtra]="extraTemplate">
+      <div class="controls">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="widthInput">Width:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <nz-input-number 
+              id="widthInput"
+              [(ngModel)]="canvasWidth" 
+              (ngModelChange)="updateCanvas()"
+              [nzMin]="100" 
+              [nzStep]="10"
+              nzPlaceHolder="Enter width">
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+        
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="heightInput">Height:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <nz-input-number 
+              id="heightInput"
+              [(ngModel)]="canvasHeight" 
+              (ngModelChange)="updateCanvas()"
+              [nzMin]="100" 
+              [nzStep]="10"
+              nzPlaceHolder="Enter height">
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+        
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="textInput">Text:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <textarea 
+              nz-input
+              id="textInput"
+              [(ngModel)]="canvasText" 
+              (input)="updateCanvasText()"
+              nzPlaceHolder="Enter text to add to canvas"
+              [nzAutosize]="{ minRows: 2, maxRows: 4 }">
+            </textarea>
+          </nz-form-control>
+        </nz-form-item>
+        
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="fontSizeInput">Font Size:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <nz-input-number 
+              id="fontSizeInput"
+              [(ngModel)]="fontSize" 
+              (ngModelChange)="updateCanvasText()"
+              [nzMin]="8" 
+              [nzMax]="72"
+              [nzStep]="2"
+              nzPlaceHolder="Font size">
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+        
+        <nz-form-item>
+          <nz-form-control [nzSpan]="24">
+            <button nz-button nzType="primary" (click)="resetCanvas()" nzBlock>
+              <span nz-icon nzType="reload"></span>
+              Reset to Default
+            </button>
+          </nz-form-control>
+        </nz-form-item>
+        
+        <nz-form-item>
+          <nz-form-control [nzSpan]="24">
+            <button nz-button nzType="default" (click)="clearCanvas()" nzBlock>
+              <span nz-icon nzType="delete"></span>
+              Clear Canvas
+            </button>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </nz-card>
+  </div>
+</div>
+
+<ng-template #extraTemplate>
+  <span nz-icon nzType="setting"></span>
+</ng-template>
