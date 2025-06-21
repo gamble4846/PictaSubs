@@ -37,6 +37,11 @@ export class AppComponent implements AfterViewInit {
   canvasText: string = '';
   fontSize: number = 16;
   fontColor: string = '#000000';
+  fontFamily: string = 'Arial';
+  textStrokeColor: string = '#000000';
+  textStrokeSize: number = 0;
+  imageBorderColor: string = '#000000';
+  imageBorderSize: number = 0;
   textBold: boolean = false;
   textItalic: boolean = false;
   textUnderline: boolean = false;
@@ -68,6 +73,11 @@ export class AppComponent implements AfterViewInit {
     this.canvasHeight = this.defaultHeight;
     this.canvasText = '';
     this.fontColor = '#000000';
+    this.fontFamily = 'Arial';
+    this.textStrokeColor = '#000000';
+    this.textStrokeSize = 0;
+    this.imageBorderColor = '#000000';
+    this.imageBorderSize = 0;
     this.textBold = false;
     this.textItalic = false;
     this.textUnderline = false;
@@ -206,7 +216,7 @@ export class AppComponent implements AfterViewInit {
       fontWeight = 'bold ';
     }
     
-    this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px Arial`;
+    this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px ${this.fontFamily}`;
     this.ctx!.textAlign = 'center';
     this.ctx!.textBaseline = 'bottom';
     
@@ -289,6 +299,15 @@ export class AppComponent implements AfterViewInit {
           this.drawImageFromUrl(item.content, imageX + imgWidth/2, currentY, imgWidth, imgHeight);
           maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
         } else {
+          // Apply stroke if enabled
+          if (this.textStrokeSize > 0) {
+            this.ctx!.strokeStyle = this.textStrokeColor;
+            this.ctx!.lineWidth = this.textStrokeSize;
+            this.ctx!.strokeText(item.content, currentX + item.width/2, currentY);
+          }
+          
+          // Draw the main text
+          this.ctx!.fillStyle = this.fontColor;
           this.ctx!.fillText(item.content, currentX + item.width/2, currentY);
           
           // Apply underline if enabled
@@ -330,6 +349,14 @@ export class AppComponent implements AfterViewInit {
       const drawX = x - drawWidth / 2;
       const drawY = y - drawHeight;
       
+      // Draw image border if enabled
+      if (this.imageBorderSize > 0) {
+        this.ctx!.strokeStyle = this.imageBorderColor;
+        this.ctx!.lineWidth = this.imageBorderSize;
+        this.ctx!.strokeRect(drawX - this.imageBorderSize/2, drawY - this.imageBorderSize/2, 
+                           drawWidth + this.imageBorderSize, drawHeight + this.imageBorderSize);
+      }
+      
       this.ctx!.drawImage(img, drawX, drawY, drawWidth, drawHeight);
     };
     
@@ -339,7 +366,7 @@ export class AppComponent implements AfterViewInit {
       this.ctx!.fillStyle = '#ccc';
       this.ctx!.fillRect(x - maxWidth/2, y - maxHeight, maxWidth, maxHeight);
       this.ctx!.fillStyle = '#666';
-      this.ctx!.font = '14px Arial';
+      this.ctx!.font = `14px ${this.fontFamily}`;
       this.ctx!.textAlign = 'center';
       this.ctx!.textBaseline = 'middle';
       this.ctx!.fillText('Image failed to load', x, y - maxHeight/2);
@@ -421,7 +448,7 @@ export class AppComponent implements AfterViewInit {
         fontWeight = 'bold ';
       }
       
-      this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px Arial`;
+      this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px ${this.fontFamily}`;
       this.ctx!.textAlign = 'center';
       this.ctx!.textBaseline = 'bottom';
       
@@ -506,6 +533,15 @@ export class AppComponent implements AfterViewInit {
             imagePromises.push(imgPromise);
             maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
           } else {
+            // Apply stroke if enabled
+            if (this.textStrokeSize > 0) {
+              this.ctx!.strokeStyle = this.textStrokeColor;
+              this.ctx!.lineWidth = this.textStrokeSize;
+              this.ctx!.strokeText(item.content, currentX + item.width/2, currentY);
+            }
+            
+            // Draw the main text
+            this.ctx!.fillStyle = this.fontColor;
             this.ctx!.fillText(item.content, currentX + item.width/2, currentY);
             
             // Apply underline if enabled
@@ -554,6 +590,14 @@ export class AppComponent implements AfterViewInit {
         const drawX = x - drawWidth / 2;
         const drawY = y - drawHeight;
         
+        // Draw image border if enabled
+        if (this.imageBorderSize > 0) {
+          this.ctx!.strokeStyle = this.imageBorderColor;
+          this.ctx!.lineWidth = this.imageBorderSize;
+          this.ctx!.strokeRect(drawX - this.imageBorderSize/2, drawY - this.imageBorderSize/2, 
+                             drawWidth + this.imageBorderSize, drawHeight + this.imageBorderSize);
+        }
+        
         this.ctx!.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         resolve();
       };
@@ -564,7 +608,7 @@ export class AppComponent implements AfterViewInit {
         this.ctx!.fillStyle = '#ccc';
         this.ctx!.fillRect(x - maxWidth/2, y - maxHeight, maxWidth, maxHeight);
         this.ctx!.fillStyle = '#666';
-        this.ctx!.font = '14px Arial';
+        this.ctx!.font = `14px ${this.fontFamily}`;
         this.ctx!.textAlign = 'center';
         this.ctx!.textBaseline = 'middle';
         this.ctx!.fillText('Image failed to load', x, y - maxHeight/2);

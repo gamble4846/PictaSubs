@@ -45,9 +45,43 @@
         <nz-form-item>
           <nz-form-label [nzSpan]="6" nzFor="fontColorInput">Font Color:</nz-form-label>
           <nz-form-control [nzSpan]="18">
-            <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" 
-              nzShowText nzSize="default">
+            <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" nzShowText
+              nzSize="default">
             </nz-color-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="fontFamilyInput">Font Family:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <input nz-input id="fontFamilyInput" [(ngModel)]="fontFamily" (input)="updateCanvasText()"
+              nzPlaceHolder="Enter font family (e.g., Arial, Times New Roman, Helvetica)">
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="textStrokeColorInput">Text Stroke:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <div class="stroke-controls">
+              <nz-color-picker [(ngModel)]="textStrokeColor" (ngModelChange)="updateCanvasText()" nzShowText>
+              </nz-color-picker>
+              <nz-input-number [(ngModel)]="textStrokeSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
+                [nzStep]="1" nzPlaceHolder="Size">
+              </nz-input-number>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="imageBorderColorInput">Image Border:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <div class="border-controls">
+              <nz-color-picker [(ngModel)]="imageBorderColor" (ngModelChange)="updateCanvasText()" nzShowText>
+              </nz-color-picker>
+              <nz-input-number [(ngModel)]="imageBorderSize" (ngModelChange)="updateCanvasText()" [nzMin]="0"
+                [nzStep]="1" nzPlaceHolder="Size">
+              </nz-input-number>
+            </div>
           </nz-form-control>
         </nz-form-item>
 

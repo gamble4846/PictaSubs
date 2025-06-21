@@ -63,6 +63,23 @@ canvas {
   text-decoration: underline;
 }
 
+.stroke-controls,
+.border-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.stroke-controls nz-color-picker,
+.border-controls nz-color-picker {
+  flex-shrink: 0;
+}
+
+.stroke-controls nz-input-number,
+.border-controls nz-input-number {
+  flex-shrink: 0;
+}
+
 /* Custom styling for the card */
 ::ng-deep .ant-card {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
