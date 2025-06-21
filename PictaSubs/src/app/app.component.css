@@ -39,6 +39,29 @@ canvas {
   margin-bottom: 0;
 }
 
+.text-style-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.text-style-options label {
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.text-style-options label strong {
+  font-weight: bold;
+}
+
+.text-style-options label em {
+  font-style: italic;
+}
+
+.text-style-options label u {
+  text-decoration: underline;
+}
+
 /* Custom styling for the card */
 ::ng-deep .ant-card {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);

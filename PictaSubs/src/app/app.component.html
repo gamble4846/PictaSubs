@@ -43,6 +43,23 @@
         </nz-form-item>
 
         <nz-form-item>
+          <nz-form-label [nzSpan]="6">Text Style:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <div class="text-style-options">
+              <label nz-checkbox [(ngModel)]="textBold" (ngModelChange)="updateCanvasText()">
+                <strong>Bold</strong>
+              </label>
+              <label nz-checkbox [(ngModel)]="textItalic" (ngModelChange)="updateCanvasText()">
+                <em>Italic</em>
+              </label>
+              <label nz-checkbox [(ngModel)]="textUnderline" (ngModelChange)="updateCanvasText()">
+                <u>Underline</u>
+              </label>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
           <nz-form-control [nzSpan]="24">
             <button nz-button nzType="primary" (click)="resetCanvas()" nzBlock>
               <span nz-icon nzType="reload"></span>

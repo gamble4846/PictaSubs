@@ -7,6 +7,7 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     NzInputNumberModule,
     NzInputModule,
     NzButtonModule,
-    NzIconModule
+    NzIconModule,
+    NzCheckboxModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -32,6 +34,9 @@ export class AppComponent implements AfterViewInit {
   canvasHeight: number = 1080;
   canvasText: string = '';
   fontSize: number = 16;
+  textBold: boolean = false;
+  textItalic: boolean = false;
+  textUnderline: boolean = false;
   private ctx!: CanvasRenderingContext2D;
   private defaultWidth: number = 400;
   private defaultHeight: number = 300;
@@ -59,6 +64,9 @@ export class AppComponent implements AfterViewInit {
     this.canvasWidth = this.defaultWidth;
     this.canvasHeight = this.defaultHeight;
     this.canvasText = '';
+    this.textBold = false;
+    this.textItalic = false;
+    this.textUnderline = false;
     this.updateCanvas();
   }
 
@@ -127,13 +135,32 @@ export class AppComponent implements AfterViewInit {
       parts.push({type: 'text', content: textAfter.trim()});
     }
     
+    // If no parts were created (no images found), treat the entire text as a text part
+    if (parts.length === 0 && text.trim()) {
+      parts.push({type: 'text', content: text.trim()});
+    }
+    
+    console.log('Parts created:', parts);
+    
     let currentY = y;
     const lineHeight = this.fontSize + 4;
     const imageMargin = 10; // Margin around images
     
     // Set text properties
     this.ctx!.fillStyle = '#000000';
-    this.ctx!.font = `${this.fontSize}px Arial`;
+    
+    // Build font string based on formatting options
+    let fontStyle = '';
+    if (this.textItalic) {
+      fontStyle += 'italic ';
+    }
+    
+    let fontWeight = '';
+    if (this.textBold) {
+      fontWeight = 'bold ';
+    }
+    
+    this.ctx!.font = `${fontStyle}${fontWeight}${this.fontSize}px Arial`;
     this.ctx!.textAlign = 'center';
     this.ctx!.textBaseline = 'bottom';
     
@@ -197,6 +224,8 @@ export class AppComponent implements AfterViewInit {
       lines.push(currentLine);
     }
     
+    console.log('Lines created:', lines);
+    
     // Draw all lines
     for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
       const line = lines[lineIndex];
@@ -215,6 +244,18 @@ export class AppComponent implements AfterViewInit {
           maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
         } else {
           this.ctx!.fillText(item.content, currentX + item.width/2, currentY);
+          
+          // Apply underline if enabled
+          if (this.textUnderline) {
+            const textMetrics = this.ctx!.measureText(item.content);
+            const underlineY = currentY + 2; // Position underline below text
+            this.ctx!.strokeStyle = '#000000';
+            this.ctx!.lineWidth = 1;
+            this.ctx!.beginPath();
+            this.ctx!.moveTo(currentX + item.width/2 - textMetrics.width/2, underlineY);
+            this.ctx!.lineTo(currentX + item.width/2 + textMetrics.width/2, underlineY);
+            this.ctx!.stroke();
+          }
         }
         
         currentX += item.width;
