@@ -8,6 +8,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzColorPickerModule } from 'ng-zorro-antd/color-picker';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,8 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     NzInputModule,
     NzButtonModule,
     NzIconModule,
-    NzCheckboxModule
+    NzCheckboxModule,
+    NzColorPickerModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -34,6 +36,7 @@ export class AppComponent implements AfterViewInit {
   canvasHeight: number = 1080;
   canvasText: string = '';
   fontSize: number = 16;
+  fontColor: string = '#000000';
   textBold: boolean = false;
   textItalic: boolean = false;
   textUnderline: boolean = false;
@@ -64,6 +67,7 @@ export class AppComponent implements AfterViewInit {
     this.canvasWidth = this.defaultWidth;
     this.canvasHeight = this.defaultHeight;
     this.canvasText = '';
+    this.fontColor = '#000000';
     this.textBold = false;
     this.textItalic = false;
     this.textUnderline = false;
@@ -147,7 +151,7 @@ export class AppComponent implements AfterViewInit {
     const imageMargin = 10; // Margin around images
     
     // Set text properties
-    this.ctx!.fillStyle = '#000000';
+    this.ctx!.fillStyle = this.fontColor;
     
     // Build font string based on formatting options
     let fontStyle = '';
@@ -249,7 +253,7 @@ export class AppComponent implements AfterViewInit {
           if (this.textUnderline) {
             const textMetrics = this.ctx!.measureText(item.content);
             const underlineY = currentY + 2; // Position underline below text
-            this.ctx!.strokeStyle = '#000000';
+            this.ctx!.strokeStyle = this.fontColor;
             this.ctx!.lineWidth = 1;
             this.ctx!.beginPath();
             this.ctx!.moveTo(currentX + item.width/2 - textMetrics.width/2, underlineY);

@@ -43,6 +43,15 @@
         </nz-form-item>
 
         <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="fontColorInput">Font Color:</nz-form-label>
+          <nz-form-control [nzSpan]="18">
+            <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" 
+              nzShowText nzSize="default">
+            </nz-color-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
           <nz-form-label [nzSpan]="6">Text Style:</nz-form-label>
           <nz-form-control [nzSpan]="18">
             <div class="text-style-options">
