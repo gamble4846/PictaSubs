@@ -88,13 +88,6 @@ export class AppComponent implements AfterViewInit {
     this.ctx.lineWidth = 2;
     this.ctx.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Add canvas dimensions text
-    this.ctx.fillStyle = '#333';
-    this.ctx.font = `${this.fontSize}px Arial`;
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(`Canvas: ${this.canvasWidth}x${this.canvasHeight}`, this.canvasWidth / 2, this.canvasHeight / 2);
-    
     // Add user text and images if provided
     if (this.canvasText.trim()) {
       console.log('Drawing user text:', this.canvasText);
@@ -105,14 +98,37 @@ export class AppComponent implements AfterViewInit {
   }
 
   private drawTextWithImages(text: string, x: number, y: number, maxWidth: number) {
-    // Split text by image URLs in format (image:URL)
-    const imageUrlRegex = /\(image:([^)]+)\)/gi;
-    const parts = text.split(imageUrlRegex);
+    // Split text by image URLs in format (image:URL,width:100px,height:100px)
+    const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
+    let match;
+    const parts: Array<{type: 'text' | 'image', content: string, width?: number, height?: number}> = [];
+    let lastIndex = 0;
+    
+    // Find all image matches and split text accordingly
+    while ((match = imageUrlRegex.exec(text)) !== null) {
+      // Add text before the image
+      const textBefore = text.substring(lastIndex, match.index);
+      if (textBefore.trim()) {
+        parts.push({type: 'text', content: textBefore.trim()});
+      }
+      
+      // Add the image
+      const url = match[1];
+      const width = match[2] ? parseInt(match[2]) : 120;
+      const height = match[3] ? parseInt(match[3]) : 80;
+      parts.push({type: 'image', content: url, width: width, height: height});
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text after the last image
+    const textAfter = text.substring(lastIndex);
+    if (textAfter.trim()) {
+      parts.push({type: 'text', content: textAfter.trim()});
+    }
     
     let currentY = y;
     const lineHeight = this.fontSize + 4;
-    const imageHeight = 80; // Smaller image height for inline display
-    const imageWidth = 120; // Fixed image width for inline display
     const imageMargin = 10; // Margin around images
     
     // Set text properties
@@ -122,15 +138,17 @@ export class AppComponent implements AfterViewInit {
     this.ctx!.textBaseline = 'bottom';
     
     // Build lines of content
-    const lines: Array<{type: 'text' | 'image', content: string, width: number}>[] = [];
-    let currentLine: Array<{type: 'text' | 'image', content: string, width: number}> = [];
+    const lines: Array<{type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number}>[] = [];
+    let currentLine: Array<{type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number}> = [];
     let currentLineWidth = 0;
     
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
       
-      if (i % 2 === 1) {
-        // This is an image URL
+      if (part.type === 'image') {
+        // This is an image
+        const imageWidth = part.width || 120;
+        const imageHeight = part.height || 80;
         const imageTotalWidth = imageWidth + imageMargin * 2;
         
         if (currentLineWidth + imageTotalWidth > maxWidth) {
@@ -142,12 +160,18 @@ export class AppComponent implements AfterViewInit {
           }
         }
         
-        currentLine.push({type: 'image', content: part, width: imageTotalWidth});
+        currentLine.push({
+          type: 'image', 
+          content: part.content, 
+          width: imageTotalWidth,
+          imageWidth: imageWidth,
+          imageHeight: imageHeight
+        });
         currentLineWidth += imageTotalWidth;
         
-      } else if (part.trim()) {
+      } else if (part.type === 'text') {
         // This is text
-        const words = part.trim().split(' ');
+        const words = part.content.split(' ');
         
         for (let j = 0; j < words.length; j++) {
           const word = words[j];
@@ -185,8 +209,10 @@ export class AppComponent implements AfterViewInit {
         
         if (item.type === 'image') {
           const imageX = currentX + imageMargin;
-          this.drawImageFromUrl(item.content, imageX + imageWidth/2, currentY, imageWidth, imageHeight);
-          maxItemHeight = Math.max(maxItemHeight, imageHeight + imageMargin * 2);
+          const imgWidth = item.imageWidth || 120;
+          const imgHeight = item.imageHeight || 80;
+          this.drawImageFromUrl(item.content, imageX + imgWidth/2, currentY, imgWidth, imgHeight);
+          maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
         } else {
           this.ctx!.fillText(item.content, currentX + item.width/2, currentY);
         }
