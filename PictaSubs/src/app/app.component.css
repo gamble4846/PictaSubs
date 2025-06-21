@@ -28,6 +28,51 @@
   gap: 10px;
 }
 
+.timeline-states {
+  display: flex;
+  gap: 8px;
+  min-height: 50px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.state-box {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #ffffff;
+  color: #333;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.state-box:hover {
+  border-color: #1890ff;
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.state-box.current-state {
+  border-color: #52c41a;
+  background-color: #f6ffed;
+  color: #52c41a;
+  box-shadow: 0 2px 4px rgba(82, 196, 26, 0.2);
+}
+
+.state-box.current-state:hover {
+  border-color: #389e0d;
+  background-color: #f6ffed;
+  color: #389e0d;
+}
+
 .canvas-and-controls {
   display: flex;
   gap: 20px;
@@ -111,7 +156,7 @@ canvas {
 
 /* Custom styling for the card */
 ::ng-deep .ant-card {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
 
@@ -138,16 +183,24 @@ canvas {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .canvas-and-controls {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .controls-section {
     flex: none;
     width: 100%;
     max-width: 400px;
     position: static;
   }
+}
+
+.no-states-message {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  width: 100%;
+  padding: 10px;
 }

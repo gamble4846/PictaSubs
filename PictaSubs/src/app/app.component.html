@@ -1,6 +1,15 @@
 <div class="main-container">
   <div class="timeline-section">
     <nz-card nzTitle="Timeline" [nzExtra]="timelineExtraTemplate">
+      <div class="timeline-states">
+        <div *ngFor="let state of canvasStates; let i = index" class="state-box"
+          [class.current-state]="i === currentStateIndex" (click)="goToState(i)">
+          {{ i + 1 }}
+        </div>
+        <div *ngIf="canvasStates.length === 0" class="no-states-message">
+          No states available. Use "Add New State" to create your first state.
+        </div>
+      </div>
       <div class="timeline-controls">
         <div class="timeline-info">
           <span>{{ getCurrentStateInfo() }}</span>
@@ -39,8 +48,8 @@
           <nz-form-item>
             <nz-form-label [nzSpan]="6" nzFor="heightInput">Height:</nz-form-label>
             <nz-form-control [nzSpan]="18">
-              <nz-input-number id="heightInput" [(ngModel)]="canvasHeight" (ngModelChange)="updateCanvas()" [nzMin]="100"
-                [nzStep]="10" nzPlaceHolder="Enter height">
+              <nz-input-number id="heightInput" [(ngModel)]="canvasHeight" (ngModelChange)="updateCanvas()"
+                [nzMin]="100" [nzStep]="10" nzPlaceHolder="Enter height">
               </nz-input-number>
             </nz-form-control>
           </nz-form-item>
@@ -57,8 +66,8 @@
           <nz-form-item>
             <nz-form-label [nzSpan]="6" nzFor="fontSizeInput">Font Size:</nz-form-label>
             <nz-form-control [nzSpan]="18">
-              <nz-input-number id="fontSizeInput" [(ngModel)]="fontSize" (ngModelChange)="updateCanvasText()" [nzMin]="8"
-                [nzStep]="2" nzPlaceHolder="Font size">
+              <nz-input-number id="fontSizeInput" [(ngModel)]="fontSize" (ngModelChange)="updateCanvasText()"
+                [nzMin]="8" [nzStep]="2" nzPlaceHolder="Font size">
               </nz-input-number>
             </nz-form-control>
           </nz-form-item>
@@ -66,8 +75,8 @@
           <nz-form-item>
             <nz-form-label [nzSpan]="6" nzFor="fontColorInput">Font Color:</nz-form-label>
             <nz-form-control [nzSpan]="18">
-              <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()" nzShowText
-                nzSize="default">
+              <nz-color-picker id="fontColorInput" [(ngModel)]="fontColor" (ngModelChange)="updateCanvasText()"
+                nzShowText nzSize="default">
               </nz-color-picker>
             </nz-form-control>
           </nz-form-item>
