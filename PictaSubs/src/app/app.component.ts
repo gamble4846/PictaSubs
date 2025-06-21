@@ -151,6 +151,26 @@ export class AppComponent implements AfterViewInit {
 
     this.canvasStates.push(newState);
     this.currentStateIndex = this.canvasStates.length - 1;
+
+    // Reset canvas to default values for the new state
+    this.resetCanvasToDefaults();
+  }
+
+  private resetCanvasToDefaults() {
+    this.canvasWidth = this.defaultWidth;
+    this.canvasHeight = this.defaultHeight;
+    this.canvasText = '';
+    this.fontColor = '#000000';
+    this.fontFamily = 'Arial';
+    this.textStrokeColor = '#000000';
+    this.textStrokeSize = 0;
+    this.imageBorderColor = '#000000';
+    this.imageBorderSize = 0;
+    this.textBold = false;
+    this.textItalic = false;
+    this.textUnderline = false;
+    
+    this.updateCanvas();
   }
 
   updateCanvas() {
@@ -711,12 +731,6 @@ export class AppComponent implements AfterViewInit {
 
       img.src = url;
     });
-  }
-
-  getCurrentStateInfo(): string {
-    if (this.canvasStates.length === 0) return 'No states saved';
-    const state = this.canvasStates[this.currentStateIndex];
-    return `State ${this.currentStateIndex + 1} of ${this.canvasStates.length} - ${state.timestamp.toLocaleTimeString()}`;
   }
 
   loadCanvasState(state: any) {

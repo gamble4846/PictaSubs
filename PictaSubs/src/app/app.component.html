@@ -11,10 +11,7 @@
         </div>
       </div>
       <div class="timeline-controls">
-        <div class="timeline-info">
-          <span>{{ getCurrentStateInfo() }}</span>
-        </div>
-        <div class="timeline-buttons">
+        <div class="timeline-buttons-left">
           <button nz-button nzType="default" (click)="goToPrevious()" [disabled]="!canGoPrevious()">
             <span nz-icon nzType="left"></span>
             Previous
@@ -22,6 +19,16 @@
           <button nz-button nzType="default" (click)="goToNext()" [disabled]="!canGoNext()">
             Next
             <span nz-icon nzType="right"></span>
+          </button>
+        </div>
+        <div class="timeline-buttons-right">
+          <button nz-button nzType="default" (click)="saveCurrentState()">
+            <span nz-icon nzType="save"></span>
+            Save
+          </button>
+          <button nz-button nzType="primary" (click)="addNewState()">
+            <span nz-icon nzType="plus"></span>
+            Add New
           </button>
         </div>
       </div>
@@ -129,24 +136,6 @@
                   <u>Underline</u>
                 </label>
               </div>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item>
-            <nz-form-control [nzSpan]="24">
-              <button nz-button nzType="default" (click)="saveCurrentState()" nzBlock>
-                <span nz-icon nzType="save"></span>
-                Save Current State
-              </button>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item>
-            <nz-form-control [nzSpan]="24">
-              <button nz-button nzType="primary" (click)="addNewState()" nzBlock>
-                <span nz-icon nzType="plus"></span>
-                Add New State
-              </button>
             </nz-form-control>
           </nz-form-item>
 

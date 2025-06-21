@@ -17,6 +17,13 @@
   gap: 20px;
 }
 
+.timeline-buttons-left,
+.timeline-buttons-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .timeline-info {
   flex: 1;
   font-weight: 500;
@@ -25,7 +32,9 @@
 
 .timeline-buttons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .timeline-states {
