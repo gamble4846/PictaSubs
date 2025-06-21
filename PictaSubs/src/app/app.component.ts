@@ -174,7 +174,7 @@ export class AppComponent implements AfterViewInit {
     }
     
     // Draw all lines
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
       const line = lines[lineIndex];
       const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
       let currentX = x - lineWidth / 2; // Center the line
