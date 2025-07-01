@@ -47,6 +47,7 @@ export class AppComponent implements AfterViewInit {
   textItalic: boolean = false;
   textUnderline: boolean = false;
   textMarginBottom: number = 30;
+  backgroundImage: string | null = null;
   private ctx!: CanvasRenderingContext2D;
   private defaultWidth: number = 1920;
   private defaultHeight: number = 1080;
@@ -67,6 +68,7 @@ export class AppComponent implements AfterViewInit {
     textItalic: boolean;
     textUnderline: boolean;
     textMarginBottom: number;
+    backgroundImage: string | null;
     timestamp: Date;
   }> = [];
   currentStateIndex: number = -1;
@@ -99,6 +101,7 @@ export class AppComponent implements AfterViewInit {
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
       textMarginBottom: this.textMarginBottom,
+      backgroundImage: this.backgroundImage,
       timestamp: new Date()
     };
 
@@ -124,6 +127,7 @@ export class AppComponent implements AfterViewInit {
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
       textMarginBottom: this.textMarginBottom,
+      backgroundImage: this.backgroundImage,
       timestamp: new Date()
     };
 
@@ -147,7 +151,8 @@ export class AppComponent implements AfterViewInit {
       textBold: this.textBold,
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
-      textMarginBottom: this.textMarginBottom
+      textMarginBottom: this.textMarginBottom,
+      backgroundImage: this.backgroundImage
     };
   }
 
@@ -168,6 +173,7 @@ export class AppComponent implements AfterViewInit {
       this.textItalic = this.defaultState.textItalic;
       this.textUnderline = this.defaultState.textUnderline;
       this.textMarginBottom = this.defaultState.textMarginBottom;
+      this.backgroundImage = this.defaultState.backgroundImage;
     } else {
       // Use original hardcoded defaults
       this.canvasWidth = this.defaultWidth;
@@ -184,6 +190,7 @@ export class AppComponent implements AfterViewInit {
       this.textItalic = false;
       this.textUnderline = false;
       this.textMarginBottom = 30;
+      this.backgroundImage = null;
     }
     this.updateCanvas();
   }
@@ -204,6 +211,7 @@ export class AppComponent implements AfterViewInit {
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
       textMarginBottom: this.textMarginBottom,
+      backgroundImage: this.backgroundImage,
       timestamp: new Date()
     };
 
@@ -224,8 +232,24 @@ export class AppComponent implements AfterViewInit {
   }
 
   updateCanvasText() {
-    console.log('updateCanvasText called with:', this.canvasText);
-    this.drawCanvas();
+    this.updateCanvas();
+  }
+
+  onBackgroundImageSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.backgroundImage = e.target?.result as string;
+        this.updateCanvas();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearBackgroundImage() {
+    this.backgroundImage = null;
+    this.updateCanvas();
   }
 
   clearCanvas() {
@@ -270,14 +294,56 @@ export class AppComponent implements AfterViewInit {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    // Set background
-    this.ctx.fillStyle = '#f0f0f0';
-    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    // Draw background image if set, otherwise use default background
+    if (this.backgroundImage) {
+      this.drawBackgroundImage();
+    } else {
+      // Set default background
+      this.ctx.fillStyle = '#f0f0f0';
+      this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      
+      // Draw border and text
+      this.drawBorderAndText();
+    }
+  }
 
+  private drawBackgroundImage() {
+    const img = new Image();
+    img.onload = () => {
+      // Calculate aspect ratio to maintain proportions
+      const aspectRatio = img.width / img.height;
+      let drawWidth = this.canvasWidth;
+      let drawHeight = drawWidth / aspectRatio;
+
+      if (drawHeight > this.canvasHeight) {
+        drawHeight = this.canvasHeight;
+        drawWidth = drawHeight * aspectRatio;
+      }
+
+      // Center the image
+      const drawX = (this.canvasWidth - drawWidth) / 2;
+      const drawY = (this.canvasHeight - drawHeight) / 2;
+
+      this.ctx!.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+      
+      // Draw border and text after background image
+      this.drawBorderAndText();
+    };
+    img.onerror = () => {
+      console.error('Failed to load background image');
+      // Fallback to default background
+      this.ctx!.fillStyle = '#f0f0f0';
+      this.ctx!.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      this.drawBorderAndText();
+    };
+    img.src = this.backgroundImage!;
+  }
+
+  private drawBorderAndText() {
     // Draw a border
-    this.ctx.strokeStyle = '#333';
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
+    this.ctx!.strokeStyle = '#333';
+    this.ctx!.lineWidth = 2;
+    this.ctx!.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
 
     // Add user text and images if provided
     if (this.canvasText.trim()) {
@@ -800,6 +866,7 @@ export class AppComponent implements AfterViewInit {
     this.textItalic = state.textItalic;
     this.textUnderline = state.textUnderline;
     this.textMarginBottom = state.textMarginBottom;
+    this.backgroundImage = state.backgroundImage;
 
     this.updateCanvas();
   }
@@ -847,6 +914,7 @@ export class AppComponent implements AfterViewInit {
       state1.textBold === state2.textBold &&
       state1.textItalic === state2.textItalic &&
       state1.textUnderline === state2.textUnderline &&
-      state1.textMarginBottom === state2.textMarginBottom;
+      state1.textMarginBottom === state2.textMarginBottom &&
+      state1.backgroundImage === state2.backgroundImage;
   }
 }

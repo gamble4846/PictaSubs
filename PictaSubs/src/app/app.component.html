@@ -110,6 +110,27 @@
           </nz-form-item>
 
           <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="backgroundImageInput">Background Image:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <div class="background-image-controls">
+                <input type="file" id="backgroundImageInput" accept="image/*" (change)="onBackgroundImageSelected($event)"
+                  style="display: none;" #backgroundImageFileInput>
+                <button nz-button nzType="default" (click)="backgroundImageFileInput.click()">
+                  <span nz-icon nzType="upload"></span>
+                  Choose Image
+                </button>
+                <button *ngIf="backgroundImage" nz-button nzType="default" nzDanger (click)="clearBackgroundImage()">
+                  <span nz-icon nzType="delete"></span>
+                  Clear
+                </button>
+              </div>
+              <div *ngIf="backgroundImage" class="background-image-info">
+                <small>Background image loaded. Will be excluded from downloads.</small>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
             <nz-form-label [nzSpan]="6" nzFor="textStrokeColorInput">Text Stroke:</nz-form-label>
             <nz-form-control [nzSpan]="18">
               <div class="stroke-controls">
