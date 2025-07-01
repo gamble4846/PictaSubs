@@ -30,6 +30,10 @@
             <span nz-icon nzType="plus"></span>
             Add New
           </button>
+          <button nz-button nzType="default" (click)="setAsDefault()">
+            <span nz-icon nzType="star"></span>
+            Set as Default
+          </button>
         </div>
       </div>
     </nz-card>
@@ -93,6 +97,15 @@
             <nz-form-control [nzSpan]="18">
               <input nz-input id="fontFamilyInput" [(ngModel)]="fontFamily" (input)="updateCanvasText()"
                 nzPlaceHolder="Enter font family (e.g., Arial, Times New Roman, Helvetica)">
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="textMarginBottomInput">Text Margin Bottom:</nz-form-label>
+            <nz-form-control [nzSpan]="18">
+              <nz-input-number id="textMarginBottomInput" [(ngModel)]="textMarginBottom" (ngModelChange)="updateCanvasText()"
+                [nzMin]="0" [nzStep]="5" nzPlaceHolder="Margin from bottom (px)">
+              </nz-input-number>
             </nz-form-control>
           </nz-form-item>
 

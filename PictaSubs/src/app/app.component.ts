@@ -36,16 +36,17 @@ export class AppComponent implements AfterViewInit {
   canvasWidth: number = 1920;
   canvasHeight: number = 1080;
   canvasText: string = '';
-  fontSize: number = 16;
-  fontColor: string = '#000000';
-  fontFamily: string = 'Arial';
+  fontSize: number = 100;
+  fontColor: string = '#ffffff';
+  fontFamily: string = 'Komikax';
   textStrokeColor: string = '#000000';
-  textStrokeSize: number = 0;
+  textStrokeSize: number = 10;
   imageBorderColor: string = '#000000';
   imageBorderSize: number = 0;
   textBold: boolean = false;
   textItalic: boolean = false;
   textUnderline: boolean = false;
+  textMarginBottom: number = 30;
   private ctx!: CanvasRenderingContext2D;
   private defaultWidth: number = 1920;
   private defaultHeight: number = 1080;
@@ -65,9 +66,11 @@ export class AppComponent implements AfterViewInit {
     textBold: boolean;
     textItalic: boolean;
     textUnderline: boolean;
+    textMarginBottom: number;
     timestamp: Date;
   }> = [];
   currentStateIndex: number = -1;
+  defaultState: any = null;
 
   ngAfterViewInit() {
     this.initializeCanvas();
@@ -95,6 +98,7 @@ export class AppComponent implements AfterViewInit {
       textBold: this.textBold,
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
+      textMarginBottom: this.textMarginBottom,
       timestamp: new Date()
     };
 
@@ -119,11 +123,69 @@ export class AppComponent implements AfterViewInit {
       textBold: this.textBold,
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
+      textMarginBottom: this.textMarginBottom,
       timestamp: new Date()
     };
 
     // Update the current state
     this.canvasStates[this.currentStateIndex] = currentState;
+  }
+
+  setAsDefault() {
+    // Save the current canvas properties as the new default
+    this.defaultState = {
+      canvasWidth: this.canvasWidth,
+      canvasHeight: this.canvasHeight,
+      canvasText: this.canvasText,
+      fontSize: this.fontSize,
+      fontColor: this.fontColor,
+      fontFamily: this.fontFamily,
+      textStrokeColor: this.textStrokeColor,
+      textStrokeSize: this.textStrokeSize,
+      imageBorderColor: this.imageBorderColor,
+      imageBorderSize: this.imageBorderSize,
+      textBold: this.textBold,
+      textItalic: this.textItalic,
+      textUnderline: this.textUnderline,
+      textMarginBottom: this.textMarginBottom
+    };
+  }
+
+  resetCanvas() {
+    if (this.defaultState) {
+      // Use custom default state
+      this.canvasWidth = this.defaultState.canvasWidth;
+      this.canvasHeight = this.defaultState.canvasHeight;
+      this.canvasText = this.defaultState.canvasText;
+      this.fontColor = this.defaultState.fontColor;
+      this.fontFamily = this.defaultState.fontFamily;
+      this.fontSize = this.defaultState.fontSize;
+      this.textStrokeColor = this.defaultState.textStrokeColor;
+      this.textStrokeSize = this.defaultState.textStrokeSize;
+      this.imageBorderColor = this.defaultState.imageBorderColor;
+      this.imageBorderSize = this.defaultState.imageBorderSize;
+      this.textBold = this.defaultState.textBold;
+      this.textItalic = this.defaultState.textItalic;
+      this.textUnderline = this.defaultState.textUnderline;
+      this.textMarginBottom = this.defaultState.textMarginBottom;
+    } else {
+      // Use original hardcoded defaults
+      this.canvasWidth = this.defaultWidth;
+      this.canvasHeight = this.defaultHeight;
+      this.canvasText = '';
+      this.fontColor = '#ffffff';
+      this.fontFamily = 'Komikax';
+      this.fontSize = 100;
+      this.textStrokeColor = '#000000';
+      this.textStrokeSize = 10;
+      this.imageBorderColor = '#000000';
+      this.imageBorderSize = 0;
+      this.textBold = false;
+      this.textItalic = false;
+      this.textUnderline = false;
+      this.textMarginBottom = 30;
+    }
+    this.updateCanvas();
   }
 
   addNewState() {
@@ -141,6 +203,7 @@ export class AppComponent implements AfterViewInit {
       textBold: this.textBold,
       textItalic: this.textItalic,
       textUnderline: this.textUnderline,
+      textMarginBottom: this.textMarginBottom,
       timestamp: new Date()
     };
 
@@ -153,24 +216,7 @@ export class AppComponent implements AfterViewInit {
     this.currentStateIndex = this.canvasStates.length - 1;
 
     // Reset canvas to default values for the new state
-    this.resetCanvasToDefaults();
-  }
-
-  private resetCanvasToDefaults() {
-    this.canvasWidth = this.defaultWidth;
-    this.canvasHeight = this.defaultHeight;
-    this.canvasText = '';
-    this.fontColor = '#000000';
-    this.fontFamily = 'Arial';
-    this.textStrokeColor = '#000000';
-    this.textStrokeSize = 0;
-    this.imageBorderColor = '#000000';
-    this.imageBorderSize = 0;
-    this.textBold = false;
-    this.textItalic = false;
-    this.textUnderline = false;
-    
-    this.updateCanvas();
+    this.resetCanvas();
   }
 
   updateCanvas() {
@@ -180,22 +226,6 @@ export class AppComponent implements AfterViewInit {
   updateCanvasText() {
     console.log('updateCanvasText called with:', this.canvasText);
     this.drawCanvas();
-  }
-
-  resetCanvas() {
-    this.canvasWidth = this.defaultWidth;
-    this.canvasHeight = this.defaultHeight;
-    this.canvasText = '';
-    this.fontColor = '#000000';
-    this.fontFamily = 'Arial';
-    this.textStrokeColor = '#000000';
-    this.textStrokeSize = 0;
-    this.imageBorderColor = '#000000';
-    this.imageBorderSize = 0;
-    this.textBold = false;
-    this.textItalic = false;
-    this.textUnderline = false;
-    this.updateCanvas();
   }
 
   clearCanvas() {
@@ -252,7 +282,7 @@ export class AppComponent implements AfterViewInit {
     // Add user text and images if provided
     if (this.canvasText.trim()) {
       console.log('Drawing user text:', this.canvasText);
-      this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
+      this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
     } else {
       console.log('No text to draw or text is empty');
     }
@@ -271,7 +301,7 @@ export class AppComponent implements AfterViewInit {
 
     // Add user text and images if provided
     if (this.canvasText.trim()) {
-      this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
+      this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
     }
   }
 
@@ -502,7 +532,7 @@ export class AppComponent implements AfterViewInit {
 
     // Add user text and images if provided
     if (this.canvasText.trim()) {
-      return this.drawTextWithImagesAsync(this.canvasText, this.canvasWidth / 2, this.canvasHeight - 30, this.canvasWidth - 60);
+      return this.drawTextWithImagesAsync(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
     }
 
     return Promise.resolve();
@@ -747,6 +777,7 @@ export class AppComponent implements AfterViewInit {
     this.textBold = state.textBold;
     this.textItalic = state.textItalic;
     this.textUnderline = state.textUnderline;
+    this.textMarginBottom = state.textMarginBottom;
 
     this.updateCanvas();
   }
@@ -793,6 +824,7 @@ export class AppComponent implements AfterViewInit {
       state1.imageBorderSize === state2.imageBorderSize &&
       state1.textBold === state2.textBold &&
       state1.textItalic === state2.textItalic &&
-      state1.textUnderline === state2.textUnderline;
+      state1.textUnderline === state2.textUnderline &&
+      state1.textMarginBottom === state2.textMarginBottom;
   }
 }
