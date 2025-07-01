@@ -272,9 +272,9 @@ export class AppComponent implements AfterViewInit {
     // Temporarily make background transparent
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    // Redraw everything except the background and wait for images to load
-    this.drawCanvasWithoutBackgroundWithImages().then(() => {
-      // Download the canvas with transparent background
+    // Redraw everything except the background and border, and wait for images to load
+    this.drawCanvasForDownload().then(() => {
+      // Download the canvas with transparent background and no border
       const link = document.createElement('a');
       link.download = `pictasubs-canvas-${new Date().getTime()}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -369,6 +369,20 @@ export class AppComponent implements AfterViewInit {
     if (this.canvasText.trim()) {
       this.drawTextWithImages(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
     }
+  }
+
+  private drawCanvasForDownload(): Promise<void> {
+    if (!this.ctx) return Promise.resolve();
+
+    // Clear the canvas (this makes it transparent)
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    // Add user text and images if provided (no border)
+    if (this.canvasText.trim()) {
+      return this.drawTextWithImagesAsync(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
+    }
+
+    return Promise.resolve();
   }
 
   private drawTextWithImages(text: string, x: number, y: number, maxWidth: number) {
@@ -592,25 +606,6 @@ export class AppComponent implements AfterViewInit {
     };
 
     img.src = url;
-  }
-
-  private drawCanvasWithoutBackgroundWithImages(): Promise<void> {
-    if (!this.ctx) return Promise.resolve();
-
-    // Clear the canvas (this makes it transparent)
-    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-
-    // Draw a border
-    this.ctx.strokeStyle = '#333';
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeRect(0, 0, this.canvasWidth, this.canvasHeight);
-
-    // Add user text and images if provided
-    if (this.canvasText.trim()) {
-      return this.drawTextWithImagesAsync(this.canvasText, this.canvasWidth / 2, this.canvasHeight - this.textMarginBottom, this.canvasWidth - 60);
-    }
-
-    return Promise.resolve();
   }
 
   private drawTextWithImagesAsync(text: string, x: number, y: number, maxWidth: number): Promise<void> {
