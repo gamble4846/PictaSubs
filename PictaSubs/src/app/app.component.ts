@@ -306,42 +306,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   private drawTextWithImages(text: string, x: number, y: number, maxWidth: number) {
-    // Split text by image URLs in format (image:URL,width:100px,height:100px)
-    const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
-    let match;
-    const parts: Array<{ type: 'text' | 'image', content: string, width?: number, height?: number }> = [];
-    let lastIndex = 0;
-
-    // Find all image matches and split text accordingly
-    while ((match = imageUrlRegex.exec(text)) !== null) {
-      // Add text before the image
-      const textBefore = text.substring(lastIndex, match.index);
-      if (textBefore.trim()) {
-        parts.push({ type: 'text', content: textBefore.trim() });
-      }
-
-      // Add the image
-      const url = match[1];
-      const width = match[2] ? parseInt(match[2]) : 120;
-      const height = match[3] ? parseInt(match[3]) : 80;
-      parts.push({ type: 'image', content: url, width: width, height: height });
-
-      lastIndex = match.index + match[0].length;
-    }
-
-    // Add remaining text after the last image
-    const textAfter = text.substring(lastIndex);
-    if (textAfter.trim()) {
-      parts.push({ type: 'text', content: textAfter.trim() });
-    }
-
-    // If no parts were created (no images found), treat the entire text as a text part
-    if (parts.length === 0 && text.trim()) {
-      parts.push({ type: 'text', content: text.trim() });
-    }
-
-    console.log('Parts created:', parts);
-
+    // Split text by newlines first to handle line breaks from textarea
+    const textLines = text.split('\n');
     let currentY = y;
     const lineHeight = this.fontSize + 4;
     const imageMargin = 10; // Margin around images
@@ -364,47 +330,65 @@ export class AppComponent implements AfterViewInit {
     this.ctx!.textAlign = 'center';
     this.ctx!.textBaseline = 'bottom';
 
-    // Build lines of content
-    const lines: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }>[] = [];
-    let currentLine: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }> = [];
-    let currentLineWidth = 0;
+    // Process each line separately
+    for (let lineIndex = textLines.length - 1; lineIndex >= 0; lineIndex--) {
+      const lineText = textLines[lineIndex].trim();
+      
+      if (!lineText) {
+        // Empty line - just add line height
+        currentY -= lineHeight;
+        continue;
+      }
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
+      // Split line by image URLs in format (image:URL,width:100px,height:100px)
+      const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
+      let match;
+      const parts: Array<{ type: 'text' | 'image', content: string, width?: number, height?: number }> = [];
+      let lastIndex = 0;
 
-      if (part.type === 'image') {
-        // This is an image
-        const imageWidth = part.width || 120;
-        const imageHeight = part.height || 80;
-        const imageTotalWidth = imageWidth + imageMargin * 2;
-
-        if (currentLineWidth + imageTotalWidth > maxWidth) {
-          // Start new line
-          if (currentLine.length > 0) {
-            lines.push([...currentLine]);
-            currentLine = [];
-            currentLineWidth = 0;
-          }
+      // Find all image matches and split text accordingly
+      while ((match = imageUrlRegex.exec(lineText)) !== null) {
+        // Add text before the image
+        const textBefore = lineText.substring(lastIndex, match.index);
+        if (textBefore.trim()) {
+          parts.push({ type: 'text', content: textBefore.trim() });
         }
 
-        currentLine.push({
-          type: 'image',
-          content: part.content,
-          width: imageTotalWidth,
-          imageWidth: imageWidth,
-          imageHeight: imageHeight
-        });
-        currentLineWidth += imageTotalWidth;
+        // Add the image
+        const url = match[1];
+        const width = match[2] ? parseInt(match[2]) : 120;
+        const height = match[3] ? parseInt(match[3]) : 80;
+        parts.push({ type: 'image', content: url, width: width, height: height });
 
-      } else if (part.type === 'text') {
-        // This is text
-        const words = part.content.split(' ');
+        lastIndex = match.index + match[0].length;
+      }
 
-        for (let j = 0; j < words.length; j++) {
-          const word = words[j];
-          const wordWidth = this.ctx!.measureText(word + ' ').width;
+      // Add remaining text after the last image
+      const textAfter = lineText.substring(lastIndex);
+      if (textAfter.trim()) {
+        parts.push({ type: 'text', content: textAfter.trim() });
+      }
 
-          if (currentLineWidth + wordWidth > maxWidth) {
+      // If no parts were created (no images found), treat the entire line as a text part
+      if (parts.length === 0 && lineText.trim()) {
+        parts.push({ type: 'text', content: lineText.trim() });
+      }
+
+      // Build lines of content for this text line
+      const lines: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }>[] = [];
+      let currentLine: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }> = [];
+      let currentLineWidth = 0;
+
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        if (part.type === 'image') {
+          // This is an image
+          const imageWidth = part.width || 120;
+          const imageHeight = part.height || 80;
+          const imageTotalWidth = imageWidth + imageMargin * 2;
+
+          if (currentLineWidth + imageTotalWidth > maxWidth) {
             // Start new line
             if (currentLine.length > 0) {
               lines.push([...currentLine]);
@@ -413,64 +397,89 @@ export class AppComponent implements AfterViewInit {
             }
           }
 
-          currentLine.push({ type: 'text', content: word + ' ', width: wordWidth });
-          currentLineWidth += wordWidth;
-        }
-      }
-    }
+          currentLine.push({
+            type: 'image',
+            content: part.content,
+            width: imageTotalWidth,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
+          });
+          currentLineWidth += imageTotalWidth;
 
-    // Add the last line
-    if (currentLine.length > 0) {
-      lines.push(currentLine);
-    }
+        } else if (part.type === 'text') {
+          // This is text
+          const words = part.content.split(' ');
 
-    console.log('Lines created:', lines);
+          for (let j = 0; j < words.length; j++) {
+            const word = words[j];
+            const wordWidth = this.ctx!.measureText(word + ' ').width;
 
-    // Draw all lines
-    for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
-      const line = lines[lineIndex];
-      const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
-      let currentX = x - lineWidth / 2; // Center the line
-      let maxItemHeight = lineHeight;
+            if (currentLineWidth + wordWidth > maxWidth) {
+              // Start new line
+              if (currentLine.length > 0) {
+                lines.push([...currentLine]);
+                currentLine = [];
+                currentLineWidth = 0;
+              }
+            }
 
-      for (let itemIndex = 0; itemIndex < line.length; itemIndex++) {
-        const item = line[itemIndex];
-
-        if (item.type === 'image') {
-          const imageX = currentX + imageMargin;
-          const imgWidth = item.imageWidth || 120;
-          const imgHeight = item.imageHeight || 80;
-          this.drawImageFromUrl(item.content, imageX + imgWidth / 2, currentY, imgWidth, imgHeight);
-          maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
-        } else {
-          // Apply stroke if enabled
-          if (this.textStrokeSize > 0) {
-            this.ctx!.strokeStyle = this.textStrokeColor;
-            this.ctx!.lineWidth = this.textStrokeSize;
-            this.ctx!.strokeText(item.content, currentX + item.width / 2, currentY);
-          }
-
-          // Draw the main text
-          this.ctx!.fillStyle = this.fontColor;
-          this.ctx!.fillText(item.content, currentX + item.width / 2, currentY);
-
-          // Apply underline if enabled
-          if (this.textUnderline) {
-            const textMetrics = this.ctx!.measureText(item.content);
-            const underlineY = currentY + 2; // Position underline below text
-            this.ctx!.strokeStyle = this.fontColor;
-            this.ctx!.lineWidth = 1;
-            this.ctx!.beginPath();
-            this.ctx!.moveTo(currentX + item.width / 2 - textMetrics.width / 2, underlineY);
-            this.ctx!.lineTo(currentX + item.width / 2 + textMetrics.width / 2, underlineY);
-            this.ctx!.stroke();
+            currentLine.push({ type: 'text', content: word + ' ', width: wordWidth });
+            currentLineWidth += wordWidth;
           }
         }
-
-        currentX += item.width;
       }
 
-      currentY -= maxItemHeight;
+      // Add the last line
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+      }
+
+      // Draw all lines for this text line
+      for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
+        const line = lines[lineIndex];
+        const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
+        let currentX = x - lineWidth / 2; // Center the line
+        let maxItemHeight = lineHeight;
+
+        for (let itemIndex = 0; itemIndex < line.length; itemIndex++) {
+          const item = line[itemIndex];
+
+          if (item.type === 'image') {
+            const imageX = currentX + imageMargin;
+            const imgWidth = item.imageWidth || 120;
+            const imgHeight = item.imageHeight || 80;
+            this.drawImageFromUrl(item.content, imageX + imgWidth / 2, currentY, imgWidth, imgHeight);
+            maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
+          } else {
+            // Apply stroke if enabled
+            if (this.textStrokeSize > 0) {
+              this.ctx!.strokeStyle = this.textStrokeColor;
+              this.ctx!.lineWidth = this.textStrokeSize;
+              this.ctx!.strokeText(item.content, currentX + item.width / 2, currentY);
+            }
+
+            // Draw the main text
+            this.ctx!.fillStyle = this.fontColor;
+            this.ctx!.fillText(item.content, currentX + item.width / 2, currentY);
+
+            // Apply underline if enabled
+            if (this.textUnderline) {
+              const textMetrics = this.ctx!.measureText(item.content);
+              const underlineY = currentY + 2; // Position underline below text
+              this.ctx!.strokeStyle = this.fontColor;
+              this.ctx!.lineWidth = 1;
+              this.ctx!.beginPath();
+              this.ctx!.moveTo(currentX + item.width / 2 - textMetrics.width / 2, underlineY);
+              this.ctx!.lineTo(currentX + item.width / 2 + textMetrics.width / 2, underlineY);
+              this.ctx!.stroke();
+            }
+          }
+
+          currentX += item.width;
+        }
+
+        currentY -= maxItemHeight;
+      }
     }
   }
 
@@ -540,40 +549,8 @@ export class AppComponent implements AfterViewInit {
 
   private drawTextWithImagesAsync(text: string, x: number, y: number, maxWidth: number): Promise<void> {
     return new Promise<void>((resolve) => {
-      // Split text by image URLs in format (image:URL,width:100px,height:100px)
-      const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
-      let match;
-      const parts: Array<{ type: 'text' | 'image', content: string, width?: number, height?: number }> = [];
-      let lastIndex = 0;
-
-      // Find all image matches and split text accordingly
-      while ((match = imageUrlRegex.exec(text)) !== null) {
-        // Add text before the image
-        const textBefore = text.substring(lastIndex, match.index);
-        if (textBefore.trim()) {
-          parts.push({ type: 'text', content: textBefore.trim() });
-        }
-
-        // Add the image
-        const url = match[1];
-        const width = match[2] ? parseInt(match[2]) : 120;
-        const height = match[3] ? parseInt(match[3]) : 80;
-        parts.push({ type: 'image', content: url, width: width, height: height });
-
-        lastIndex = match.index + match[0].length;
-      }
-
-      // Add remaining text after the last image
-      const textAfter = text.substring(lastIndex);
-      if (textAfter.trim()) {
-        parts.push({ type: 'text', content: textAfter.trim() });
-      }
-
-      // If no parts were created (no images found), treat the entire text as a text part
-      if (parts.length === 0 && text.trim()) {
-        parts.push({ type: 'text', content: text.trim() });
-      }
-
+      // Split text by newlines first to handle line breaks from textarea
+      const textLines = text.split('\n');
       let currentY = y;
       const lineHeight = this.fontSize + 4;
       const imageMargin = 10; // Margin around images
@@ -596,47 +573,68 @@ export class AppComponent implements AfterViewInit {
       this.ctx!.textAlign = 'center';
       this.ctx!.textBaseline = 'bottom';
 
-      // Build lines of content
-      const lines: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }>[] = [];
-      let currentLine: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }> = [];
-      let currentLineWidth = 0;
+      // Collect all image promises
+      const imagePromises: Promise<void>[] = [];
 
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
+      // Process each line separately
+      for (let lineIndex = textLines.length - 1; lineIndex >= 0; lineIndex--) {
+        const lineText = textLines[lineIndex].trim();
+        
+        if (!lineText) {
+          // Empty line - just add line height
+          currentY -= lineHeight;
+          continue;
+        }
 
-        if (part.type === 'image') {
-          // This is an image
-          const imageWidth = part.width || 120;
-          const imageHeight = part.height || 80;
-          const imageTotalWidth = imageWidth + imageMargin * 2;
+        // Split line by image URLs in format (image:URL,width:100px,height:100px)
+        const imageUrlRegex = /\(image:([^,]+)(?:,width:(\d+)px,height:(\d+)px)?\)/gi;
+        let match;
+        const parts: Array<{ type: 'text' | 'image', content: string, width?: number, height?: number }> = [];
+        let lastIndex = 0;
 
-          if (currentLineWidth + imageTotalWidth > maxWidth) {
-            // Start new line
-            if (currentLine.length > 0) {
-              lines.push([...currentLine]);
-              currentLine = [];
-              currentLineWidth = 0;
-            }
+        // Find all image matches and split text accordingly
+        while ((match = imageUrlRegex.exec(lineText)) !== null) {
+          // Add text before the image
+          const textBefore = lineText.substring(lastIndex, match.index);
+          if (textBefore.trim()) {
+            parts.push({ type: 'text', content: textBefore.trim() });
           }
 
-          currentLine.push({
-            type: 'image',
-            content: part.content,
-            width: imageTotalWidth,
-            imageWidth: imageWidth,
-            imageHeight: imageHeight
-          });
-          currentLineWidth += imageTotalWidth;
+          // Add the image
+          const url = match[1];
+          const width = match[2] ? parseInt(match[2]) : 120;
+          const height = match[3] ? parseInt(match[3]) : 80;
+          parts.push({ type: 'image', content: url, width: width, height: height });
 
-        } else if (part.type === 'text') {
-          // This is text
-          const words = part.content.split(' ');
+          lastIndex = match.index + match[0].length;
+        }
 
-          for (let j = 0; j < words.length; j++) {
-            const word = words[j];
-            const wordWidth = this.ctx!.measureText(word + ' ').width;
+        // Add remaining text after the last image
+        const textAfter = lineText.substring(lastIndex);
+        if (textAfter.trim()) {
+          parts.push({ type: 'text', content: textAfter.trim() });
+        }
 
-            if (currentLineWidth + wordWidth > maxWidth) {
+        // If no parts were created (no images found), treat the entire line as a text part
+        if (parts.length === 0 && lineText.trim()) {
+          parts.push({ type: 'text', content: lineText.trim() });
+        }
+
+        // Build lines of content for this text line
+        const lines: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }>[] = [];
+        let currentLine: Array<{ type: 'text' | 'image', content: string, width: number, imageWidth?: number, imageHeight?: number }> = [];
+        let currentLineWidth = 0;
+
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+
+          if (part.type === 'image') {
+            // This is an image
+            const imageWidth = part.width || 120;
+            const imageHeight = part.height || 80;
+            const imageTotalWidth = imageWidth + imageMargin * 2;
+
+            if (currentLineWidth + imageTotalWidth > maxWidth) {
               // Start new line
               if (currentLine.length > 0) {
                 lines.push([...currentLine]);
@@ -645,66 +643,90 @@ export class AppComponent implements AfterViewInit {
               }
             }
 
-            currentLine.push({ type: 'text', content: word + ' ', width: wordWidth });
-            currentLineWidth += wordWidth;
-          }
-        }
-      }
+            currentLine.push({
+              type: 'image',
+              content: part.content,
+              width: imageTotalWidth,
+              imageWidth: imageWidth,
+              imageHeight: imageHeight
+            });
+            currentLineWidth += imageTotalWidth;
 
-      // Add the last line
-      if (currentLine.length > 0) {
-        lines.push(currentLine);
-      }
+          } else if (part.type === 'text') {
+            // This is text
+            const words = part.content.split(' ');
 
-      // Collect all image promises
-      const imagePromises: Promise<void>[] = [];
+            for (let j = 0; j < words.length; j++) {
+              const word = words[j];
+              const wordWidth = this.ctx!.measureText(word + ' ').width;
 
-      // Draw all lines
-      for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
-        const line = lines[lineIndex];
-        const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
-        let currentX = x - lineWidth / 2; // Center the line
-        let maxItemHeight = lineHeight;
+              if (currentLineWidth + wordWidth > maxWidth) {
+                // Start new line
+                if (currentLine.length > 0) {
+                  lines.push([...currentLine]);
+                  currentLine = [];
+                  currentLineWidth = 0;
+                }
+              }
 
-        for (let itemIndex = 0; itemIndex < line.length; itemIndex++) {
-          const item = line[itemIndex];
-
-          if (item.type === 'image') {
-            const imageX = currentX + imageMargin;
-            const imgWidth = item.imageWidth || 120;
-            const imgHeight = item.imageHeight || 80;
-            const imgPromise = this.drawImageFromUrlAsync(item.content, imageX + imgWidth / 2, currentY, imgWidth, imgHeight);
-            imagePromises.push(imgPromise);
-            maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
-          } else {
-            // Apply stroke if enabled
-            if (this.textStrokeSize > 0) {
-              this.ctx!.strokeStyle = this.textStrokeColor;
-              this.ctx!.lineWidth = this.textStrokeSize;
-              this.ctx!.strokeText(item.content, currentX + item.width / 2, currentY);
-            }
-
-            // Draw the main text
-            this.ctx!.fillStyle = this.fontColor;
-            this.ctx!.fillText(item.content, currentX + item.width / 2, currentY);
-
-            // Apply underline if enabled
-            if (this.textUnderline) {
-              const textMetrics = this.ctx!.measureText(item.content);
-              const underlineY = currentY + 2; // Position underline below text
-              this.ctx!.strokeStyle = this.fontColor;
-              this.ctx!.lineWidth = 1;
-              this.ctx!.beginPath();
-              this.ctx!.moveTo(currentX + item.width / 2 - textMetrics.width / 2, underlineY);
-              this.ctx!.lineTo(currentX + item.width / 2 + textMetrics.width / 2, underlineY);
-              this.ctx!.stroke();
+              currentLine.push({ type: 'text', content: word + ' ', width: wordWidth });
+              currentLineWidth += wordWidth;
             }
           }
-
-          currentX += item.width;
         }
 
-        currentY -= maxItemHeight;
+        // Add the last line
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
+
+        // Draw all lines for this text line
+        for (let lineIndex = lines.length - 1; lineIndex >= 0; lineIndex--) {
+          const line = lines[lineIndex];
+          const lineWidth = line.reduce((sum, item) => sum + item.width, 0);
+          let currentX = x - lineWidth / 2; // Center the line
+          let maxItemHeight = lineHeight;
+
+          for (let itemIndex = 0; itemIndex < line.length; itemIndex++) {
+            const item = line[itemIndex];
+
+            if (item.type === 'image') {
+              const imageX = currentX + imageMargin;
+              const imgWidth = item.imageWidth || 120;
+              const imgHeight = item.imageHeight || 80;
+              const imgPromise = this.drawImageFromUrlAsync(item.content, imageX + imgWidth / 2, currentY, imgWidth, imgHeight);
+              imagePromises.push(imgPromise);
+              maxItemHeight = Math.max(maxItemHeight, imgHeight + imageMargin * 2);
+            } else {
+              // Apply stroke if enabled
+              if (this.textStrokeSize > 0) {
+                this.ctx!.strokeStyle = this.textStrokeColor;
+                this.ctx!.lineWidth = this.textStrokeSize;
+                this.ctx!.strokeText(item.content, currentX + item.width / 2, currentY);
+              }
+
+              // Draw the main text
+              this.ctx!.fillStyle = this.fontColor;
+              this.ctx!.fillText(item.content, currentX + item.width / 2, currentY);
+
+              // Apply underline if enabled
+              if (this.textUnderline) {
+                const textMetrics = this.ctx!.measureText(item.content);
+                const underlineY = currentY + 2; // Position underline below text
+                this.ctx!.strokeStyle = this.fontColor;
+                this.ctx!.lineWidth = 1;
+                this.ctx!.beginPath();
+                this.ctx!.moveTo(currentX + item.width / 2 - textMetrics.width / 2, underlineY);
+                this.ctx!.lineTo(currentX + item.width / 2 + textMetrics.width / 2, underlineY);
+                this.ctx!.stroke();
+              }
+            }
+
+            currentX += item.width;
+          }
+
+          currentY -= maxItemHeight;
+        }
       }
 
       // Wait for all images to load
